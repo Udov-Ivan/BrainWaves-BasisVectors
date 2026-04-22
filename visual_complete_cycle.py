@@ -87,6 +87,7 @@ cx.set_xlim(0, 30) # Zoom in on 0-30 Hz (where Alpha/Beta live)
 cx.axvline(x=10, color='lightgray', linestyle='--', alpha=0.5, label='10 Hz Alpha Signal')
 cx.legend()
 
+# Plot D: FFT on other (untouched) axis
 dx = fig.add_subplot(144)
 dx.plot(freqs_fp2_pos, psd_fp2, color='darkred')
 dx.set_title('Frequency Spectrum (FFT of Cleaned Fp2)')
