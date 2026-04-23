@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # 1. Define our mathematical Covariance matrix
-cov = np.array([[100, 95, 0],
-                [95, 100, 0],
-                [0, 0, 2]])
+cov = np.array([[100, 95, 40],
+                [95, 100, 30],
+                [40, 30, 20]])
 mean = [0, 0, 0]
 eigenvalues, eigenvectors = np.linalg.eigh(cov)
 
@@ -17,14 +17,13 @@ t = np.arange(1000) / fs  # 10 seconds of data
 np.random.seed(42)
 data = np.random.multivariate_normal(mean, cov, 1000)
 
-# INJECTION: Add a hidden 10 Hz Alpha wave to the O1 channel (index 2)
-# This gives the Fourier Transform something rhythmic to find!
+# injectt 10 Hz Alpha wave to the O1 channel (index 2)
 alpha_wave = np.cos(2 * np.pi * 10 * t) * 1.5
 data[:, 2] += alpha_wave
 
-# 4. Perform the "Math Surgery" (Spatial Filtering)
+# basis maneuvers (Spatial Filtering)
 data_new_base = data @ eigenvectors
-data_new_base[:, 2] = 0  # Zero out the Eye Blink (eigenvalue 195 is at index 2)
+data_new_base[:, 2] = 0  # project onto the non-principal plane
 data_new_base = data_new_base @ eigenvectors.T
 
 # Save data
@@ -38,6 +37,8 @@ Fp1, Fp2, O1 = data_new_base[:, 0], data_new_base[:, 1], data_new_base[:, 2]
 # 5. FOURIER TRANSFORM (FFT)
 fft_result_o1 = np.fft.fft(O1)
 frequencies_o1 = np.fft.fftfreq(len(O1), d=1 / fs)
+fft_result_q1 = np.fft.fft(Q1)
+frequencies_q1 = np.fft.fftfreq(len(Q1), d=1 / fs)
 fft_result_fp2 = np.fft.fft(Fp2)
 frequencies_fp2 = np.fft.fftfreq(len(Fp2), d=1 / fs)
 
@@ -46,9 +47,11 @@ pos_mask_o1 = frequencies_o1 > 0
 freqs_o1_pos = frequencies_o1[pos_mask_o1]
 pos_mask_fp2 = frequencies_fp2 > 0
 freqs_fp2_pos = frequencies_fp2[pos_mask_fp2]
+freqs_q1_pos = frequencies_q1[frequencies_q1 > 0]
 # Calculate Power Spectral Density (Magnitude squared)
 psd_o1 = np.abs(fft_result_o1[pos_mask_o1]) ** 2
 psd_fp2 = np.abs(fft_result_fp2[pos_mask_fp2]) ** 2
+psd_q1 = np.abs(fft_result_q1[frequencies_q1 > 0]) ** 2
 
 # visualizations
 fig = plt.figure(figsize=(15, 6))
@@ -87,10 +90,10 @@ cx.set_xlim(0, 30) # Zoom in on 0-30 Hz (where Alpha/Beta live)
 cx.axvline(x=10, color='lightgray', linestyle='--', alpha=0.5, label='10 Hz Alpha Signal')
 cx.legend()
 
-# Plot D: FFT on other (untouched) axis
+# Plot D: FFT on uncleaned data axis
 dx = fig.add_subplot(144)
-dx.plot(freqs_fp2_pos, psd_fp2, color='darkred')
-dx.set_title('Frequency Spectrum (FFT of Cleaned Fp2)')
+dx.plot(freqs_q1_pos, psd_q1, color='darkred')
+dx.set_title('Frequency Spectrum (FFT of unCleaned q2)')
 dx.set_xlabel('Frequency (Hz)')
 dx.set_ylabel('Power')
 dx.set_xlim(0, 30)
