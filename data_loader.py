@@ -12,7 +12,7 @@ raw.pick_types(eeg=True)
 
 data = raw.get_data()
 
-print(f"Форма матрицы данных: {data.shape}")
+print(f"Форма матриці даних: {data.shape}")
 # expected output: (64, 15360)
 # 64 channels (rows), 15360 time entries (columns)
 print(data[0, :10])
