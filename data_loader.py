@@ -2,9 +2,9 @@ import mne
 from mne.datasets import eegbci
 
 
-edf_weights = eegbci.load_data(subjects=[1], runs=[1])
+edf_files = eegbci.load_data(subjects=[1], runs=[2]) #resting state (eyes closed)
 
-raw = mne.io.read_raw_edf(edf_weights[0], preload=True)
+raw = mne.io.read_raw_edf(edf_files[0], preload=True)
 
 
 raw.pick_types(eeg=True)
